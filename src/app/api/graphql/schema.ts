@@ -14,8 +14,9 @@ export const typeDefs = `#graphql
   }
 
   type Query {
-    getPosts: [Post!]!
-    users: [User!]!
+    getPosts(page: Int, limit: Int): [Post!]!
+    getPost(postId: Int!): Post
+    searchPosts(keyword: String!, page: Int, limit: Int): [Post!]!
   }
 
   type Mutation {

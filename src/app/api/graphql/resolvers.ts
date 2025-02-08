@@ -3,9 +3,42 @@ const prisma = new PrismaClient();
 
 export const resolvers = {
   Query: {
-    users: async () => await prisma.user.findMany(),
-    getPosts: async () => {
-      return prisma.user.findMany();
+    getPosts: async (
+      _: any,
+      { page = 1, limit = 10 }: { page: number; limit: number }
+    ) => {
+      return prisma.post.findMany({
+        skip: (page - 1) * limit,
+        take: limit,
+        include: { author: true },
+      });
+    },
+    getPost: async (_: any, { postId }: { postId: number }) => {
+      console.log("postId", postId);
+      const post = await prisma.post.findUnique({
+        where: {
+          id: postId,
+        },
+        include: {
+          author: true,
+        },
+      });
+      return post;
+    },
+    searchPosts: async (
+      _: any,
+      {
+        keyword,
+        page = 1,
+        limit = 10,
+      }: { keyword: string; page: number; limit: number }
+    ) => {
+      return prisma.post.findMany({
+        where: { title: { contains: keyword } },
+        skip: (page - 1) * limit,
+        take: limit,
+        include: { author: true },
+      });
     },
   },
   Mutation: {
@@ -36,7 +69,6 @@ export const resolvers = {
         userId,
       }: { title: string; content: string; userId: number }
     ) => {
-      console.log("usreId", userId);
       return prisma.post.create({
         data: {
           title,
