@@ -22,6 +22,6 @@ export const typeDefs = `#graphql
   type Mutation {
     signup(email: String!, password: String!): String
     login(email: String!, password: String!): String
-    createPost(title: String!, content: String!, userId: Int!): Post
+    createPost(title: String!, content: String!): Post
   }
 `;

@@ -1,4 +1,8 @@
+import bcrypt from "bcryptjs";
 import { PrismaClient } from "@prisma/client";
+import { NextApiResponse } from "next";
+import { JWT_SECRET } from "@/util/auth";
+import jwt from "jsonwebtoken";
 const prisma = new PrismaClient();
 
 export const resolvers = {
@@ -46,29 +50,35 @@ export const resolvers = {
       _: any,
       { email, password }: { email: string; password: string }
     ) => {
+      const hashedPassword = await bcrypt.hash(password, 10);
       const user = await prisma.user.create({
-        data: { email, password },
+        data: { email, password: hashedPassword },
       });
-      return `User Created ${user.id}`;
+      return jwt.sign({ userId: user.id }, JWT_SECRET);
     },
     login: async (
       _: any,
       { email, password }: { email: string; password: string }
     ) => {
       const user = await prisma.user.findUnique({ where: { email } });
-      if (!user || password != user.password) {
+      if (!user) {
+        throw new Error("User not found");
+      }
+
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+      if (!isPasswordValid) {
         throw new Error("Invalid credentials");
       }
-      return `Logged In ${user.id}`;
+
+      return jwt.sign({ userId: user.id }, JWT_SECRET);
     },
     createPost: async (
       _: any,
-      {
-        title,
-        content,
-        userId,
-      }: { title: string; content: string; userId: number }
+      { title, content }: { title: string; content: string },
+      { req, validateToken }
     ) => {
+      const userId = await validateToken(req);
+      if (!userId) throw new Error("Unauthorized");
       return prisma.post.create({
         data: {
           title,
