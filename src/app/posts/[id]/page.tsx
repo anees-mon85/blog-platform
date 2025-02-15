@@ -18,9 +18,7 @@ const GET_POST = gql`
 
 export default function Post() {
   const params = useParams();
-  console.log("params", params);
   const postId = params.id;
-  console.log("postid", postId);
   const { data, loading, error } = useQuery(GET_POST, {
     variables: { postId: parseInt(postId) },
   });

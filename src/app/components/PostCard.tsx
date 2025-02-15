@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { FaEdit } from "react-icons/fa";
 
 interface PostCardProps {
   post: {
@@ -22,6 +23,12 @@ export default function PostCard({ post }: PostCardProps) {
         className="text-blue-500 hover:underline"
       >
         Read More
+      </Link>
+      <Link
+        href={`/edit-post/${post.id}`}
+        className="top-4 right-4 text-gray-500 hover:text-gray-700"
+      >
+        <FaEdit size={20} />
       </Link>
     </div>
   );
